@@ -1,0 +1,53 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables (sensitive information like DB credentials)
+.env
+
+# PostgreSQL database files (if you're using local .db or dumps for development)
+*.sql
+*.pgsql
+*.db
+*.db-journal
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Test/coverage reports
+*.coverage
+*.tox/
+*.nox/
+*.coverage.*
+*.hypothesis/
+*.pytest_cache/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store   # macOS Finder metadata
+Thumbs.db   # Windows image cache
+ehthumbs.db
+
+# Temporary files
+*.swp       # Vim temporary files
+*.swo
