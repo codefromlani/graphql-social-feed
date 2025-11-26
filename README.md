@@ -214,15 +214,3 @@ subscription {
 }
 
 Server only publishes notifications to the group matching the current user's id.
-
-### Security & scaling considerations
-
-Authenticate websocket connections (AuthMiddlewareStack) — ensure tokens are validated.
-
-Rate-limit notification creation if needed to avoid spam.
-
-For very large traffic, consider a dedicated events/streaming service (Kafka) and eventual read models (materialized tables) for feeds/notifications.
-
-Retention: consider purging notifications older than X months or archiving.
-
-Use Redis cluster / SQS + Workers to scale Celery and channel layer.
