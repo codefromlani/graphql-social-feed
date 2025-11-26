@@ -1,12 +1,13 @@
 import graphene
 from apps.accounts.schema import AuthQuery, AuthMutations
+from apps.posts.schema import Query as PostsQuery, PostMutations
 
 
-class Query(AuthQuery, graphene.ObjectType):
+class Query(AuthQuery, PostsQuery, graphene.ObjectType):
     pass
 
 
-class Mutation(AuthMutations, graphene.ObjectType):
+class Mutation(AuthMutations, PostMutations, graphene.ObjectType):
     pass
 
 

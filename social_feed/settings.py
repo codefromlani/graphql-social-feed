@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "graphene_django",
 
     'apps.accounts',
+    'apps.posts',
+
+    "django.contrib.postgres",  # required for GIN & SearchVectorField
 ]
 
 MIDDLEWARE = [

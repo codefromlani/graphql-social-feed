@@ -2,8 +2,7 @@ import uuid
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVectorField
+
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -23,8 +22,6 @@ class Post(models.Model):
     # Threaded replies
     reply_to_post = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="replies")
 
-    # Full-text search vector
-    search_vector = SearchVectorField(null=True)
 
     class Meta:
         indexes = [
@@ -32,8 +29,6 @@ class Post(models.Model):
             models.Index(fields=["author", "-created_at"]),
             # Global timeline index
             models.Index(fields=["-created_at"]),
-            # Full-text search index
-            GinIndex(fields=["search_vector"]),
         ]
 
     def __str__(self):
