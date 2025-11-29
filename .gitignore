@@ -51,3 +51,18 @@ ehthumbs.db
 # Temporary files
 *.swp       # Vim temporary files
 *.swo
+
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+env
+.venv
+venv
+.git
+.gitignore
+.env
+*.sqlite3
+media
+node_modules
+staticfiles

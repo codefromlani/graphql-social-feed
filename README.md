@@ -1,23 +1,82 @@
-# OVERVIEW
+### OVERVIEW
+A GraphQL-based backend for managing social media posts and interactions. Built with Django, PostgreSQL, and GraphQL, this project provides flexible APIs for creating, querying, and managing posts, comments, likes, shares, and follows.
 
-### Goal
-A high-performance social feed backend that demonstrates deep backend engineering skills — GraphQL API, efficient data loading, caching, async jobs, real-time updates, and production deployment.
+## Local Setup:
+1. Clone the Repository
 
-## Core stack:
+```python
+   git clone https://github.com/codefromlani/graphql-social-feed.git
+   cd graphql-social-feed
+```
 
-- Backend: Django, Graphene (GraphQL), Django Channels
+2. Create Virtual Environment
+#### Windows
 
-- Database: PostgreSQL
+```python
+   python -m venv venv
+   venv\Scripts\activate
+```
 
-- Cache & broker: Redis
+#### Linux/Mac
 
-- Async tasks: Celery
+```python
+   python3 -m venv venv
+   source venv/bin/activate
+```
+3. Install Dependencies
 
-- Auth: JWT 
+```python
+   pip install -r requirements.txt
+```
 
-- Containerization: Docker + Docker Compose
+4. Set Up Environment Variables
+#### Copy `.env.example` :
 
-- Testing & CI: pytest, GitHub Actions
+```python
+   cp .env.example .env
+```
+
+5. Set Up PostgreSQL Database
+#### Access PostgreSQL
+
+```python
+   psql -U postgres
+```
+
+#### Create database
+
+```python
+   CREATE DATABASE social_feed_db;
+```
+
+#### Exit PostgreSQL
+
+```python
+   \q
+```
+
+6. Run Migrations
+
+```python
+   python manage.py migrate
+```
+
+7. Create Superuser
+
+```python
+   python manage.py createsuperuser
+```
+
+8. Run Development Server
+
+```python
+   python manage.py runserver
+```
+
+The application will be available at:
+
+- GraphQL API: `http://127.0.0.1:8000/graphql`
+- jango Admin: `http://127.0.0.1:8000/admin/`
 
 ### Key Entities
 
@@ -107,26 +166,6 @@ A high-performance social feed backend that demonstrates deep backend engineerin
 
    - CHECK: follower != followed
 
-- NOTIFICATIONS (apps.social.Notification)
-
-   - id: BIGSERIAL PK
-
-   - recipient_id -> users.id (FK)
-
-   - actor_id -> users.id (FK nullable)
-
-   - verb: varchar(50) ('liked', 'commented', 'followed', 'shared', etc.)
-
-   - target_type: varchar(50) nullable
-
-   - target_id: UUID nullable
-
-   - data: JSONB (metadata)
-
-   - is_read: boolean default false
-
-   - created_at: timestamp
-
 ### Indexes & performance notes
 
 - Posts: index (author, -created_at), index (-created_at).
@@ -137,13 +176,11 @@ A high-performance social feed backend that demonstrates deep backend engineerin
 
 - Follows: index on follower and followed for fast lookups.
 
-- Notifications: index (recipient, is_read, -created_at) for unread query + pagination.
-
 ### GraphQL API (Graphene)
 
 Root schema provides:
 
-- Queries: post, globalFeed, authorFeed, comments, replies, likes, shares, followers, following, notifications
+- Queries: post, globalFeed, authorFeed, comments, replies, likes, shares, followers, following
 
 Mutations:
 
@@ -153,64 +190,5 @@ Mutations:
 
 - Follows: followUser, unfollowUser
 
-- Notifications: markNotificationRead, markAllRead
-
 - Auth: signup, tokenAuth, refreshToken, verifyToken (from graphql_jwt)
 
-Subscriptions (via WebSockets):
-
-- notificationAdded (push new notifications in real time to recipient)
-
-### Notification flow (event)
-
-Example: user A likes post P owned by user B
-
-A executes likePost(postId=P) mutation (GraphQL, authenticated)
-
-Mutation creates/updates Like DB row
-
-Mutation calls create_notification_task.delay(recipient_id=B, actor_id=A, verb="liked", target_type="post", target_id=P, data={...})
-
-Celery worker runs create_notification_task:
-
-creates Notification DB row (recipient=B)
-
-calls push_notification_to_user(notification) which sends payload to channels group user_notifications:{B}
-
-If user B has an open GraphQL subscription (via channels_graphql_ws) they immediately receive the notification payload.
-
-The client can then show a toast + update in-app notification list and update unread count.
-
-### Realtime implementation details
-
-- Channel layer: Redis (channels_redis)
-
-- Broker: Redis (Celery)
-
-- GraphQL subscriptions: channels_graphql_ws library with a GraphQL WebSocket consumer
-
-- Group naming: user_notifications:{user_id}
-
-- Publishing: Celery task writes DB record and publishes to Channel Layer group
-
-- Client: opens WebSocket to /subscriptions/ and subscribes to notificationAdded for the current user.
-
-Example GraphQL subscription (client)
-
-Client opens WS to: ws://HOST/subscriptions/
-Sends GraphQL subscription:
-
-subscription {
-  notificationAdded {
-    notification {
-      id
-      verb
-      actor { id username }
-      data
-      isRead
-      createdAt
-    }
-  }
-}
-
-Server only publishes notifications to the group matching the current user's id.
