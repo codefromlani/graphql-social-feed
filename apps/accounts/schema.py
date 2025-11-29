@@ -1,18 +1,24 @@
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.auth import get_user_model
-import graphql_jwt
+from graphql_jwt.utils import jwt_encode
+from graphql_jwt import ObtainJSONWebToken, Verify, Refresh
 
 User = get_user_model()
 
-# GraphQL Type
+
+# -----------------------------
+# GraphQL Type for User
+# -----------------------------
 class UserType(DjangoObjectType):
     class Meta:
         model = User
         fields = ("id", "username", "email", "is_active")
 
 
+# -----------------------------
 # Signup Mutation
+# -----------------------------
 class Signup(graphene.Mutation):
     user = graphene.Field(UserType)
     token = graphene.String()
@@ -28,21 +34,25 @@ class Signup(graphene.Mutation):
             email=email,
             password=password
         )
-        # Generate JWT for new user
-        token = graphql_jwt.shortcuts.get_token(user)
+        # Convert UUID to string for JWT payload
+        token = jwt_encode({"user_id": str(user.id)})
         return Signup(user=user, token=token)
-    
 
+
+
+# -----------------------------
 # Root Mutation for Accounts
+# -----------------------------
 class AuthMutations(graphene.ObjectType):
     signup = Signup.Field()
-    # Built-in JWT mutations:
-    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
-    refresh_token = graphql_jwt.Refresh.Field()
+    token_auth = ObtainJSONWebToken.Field()
+    verify_token = Verify.Field()
+    refresh_token = Refresh.Field()
 
 
+# -----------------------------
 # Auth-protected Query
+# -----------------------------
 class AuthQuery(graphene.ObjectType):
     me = graphene.Field(UserType)
 
