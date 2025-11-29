@@ -108,3 +108,31 @@ query globalFeed {
   }
 }
 ```
+
+## SharePost (requires authorization)
+
+```python
+mutation sharePost {
+  sharePost(postId: "post_id") {
+    share {
+      id
+      user { username }
+      post { id }
+      createdAt
+    }
+  }
+}
+```
+
+## FollowAUser (requires authorization)
+
+```python
+mutation FollowUser {
+  followUser(followedId: "user_id") {
+    id
+    follower { id username }
+    followed { id username }
+    createdAt
+  }
+}
+```
